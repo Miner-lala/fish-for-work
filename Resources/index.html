@@ -217,6 +217,35 @@ h3 { font-size: 14px; font-weight: 650; color: var(--muted); }
 .clock { font-size: clamp(48px, 6vw, 72px); font-weight: 500; line-height: 1; letter-spacing: -0.02em; }
 .track { height: 6px; border-radius: 999px; background: var(--surface); overflow: hidden; }
 .clock.is-over { color: var(--stamp); }
+.wk-stop { margin-top: -4px; display: flex; flex-direction: column; align-items: flex-start; gap: 8px; font-size: 13px; }
+.wk-stop-form { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.input.time-in { width: auto; min-width: 0; padding: 4px 8px; min-height: 32px; font-family: var(--font-num); }
+.leave-pop { border: 1px solid var(--line); border-radius: 12px; background: var(--surface-2); padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; font-size: 14px; }
+.leave-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.leave-line { display: grid; grid-template-columns: 3.2em minmax(0, 1fr); align-items: center; gap: 8px; }
+.leave-k { font-size: 12px; color: var(--muted); }
+.leave-hours { display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.leave-hours select { width: auto; min-height: 32px; padding: 4px 8px; }
+.pill { appearance: none; border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 999px; padding: 4px 12px; font-size: 13px; cursor: pointer; }
+.pill.on { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.leave-msg { color: var(--muted); }
+.leave-msg.warn { color: var(--stamp); }
+.leave-list ul { list-style: none; margin: 4px 0 0; padding: 0; display: flex; flex-direction: column; }
+.leave-item { display: grid; grid-template-columns: minmax(0, 1fr) auto 3em; gap: 10px; align-items: center; padding: 5px 0; border-top: 1px solid var(--line); font-size: 13px; }
+.sess-tag { display: inline-block; margin-left: 6px; padding: 0 6px; border-radius: 999px; font-size: 11px; line-height: 17px; background: var(--surface-2); color: var(--muted); font-family: inherit; }
+.sess-tag.warn { background: #FCE9C8; color: #8A5300; }
+.dd-acts { display: inline-flex; gap: 10px; justify-self: end; white-space: nowrap; }
+.list.dd .row.sess-edit { align-items: center; background: var(--surface-2); border-radius: 8px; padding: 8px 6px; }
+.sess-edit-f { display: inline-flex; align-items: center; gap: 4px; }
+.list.dd .row.ot .dd-t, .list.dd .row.ot span { color: var(--muted); font-size: 13px; }
+.list.dd .row.ot-sum { border-top: 1px dashed var(--line); }
+.dd-trash { border-top: 1px dashed var(--line); padding-top: 4px; }
+.away-note { border: 1px solid var(--accent); border-radius: 12px; background: var(--accent-soft); color: var(--accent-ink); padding: 10px 12px; display: flex; flex-direction: column; gap: 6px; }
+.away-note .btn-row { gap: 14px; }
+.dd-trash .trash-head { font-size: 12px; color: var(--muted); padding: 6px 0 2px; }
+.list.dd .row.trash-row { color: var(--muted); }
+.list.dd .row.leave-row .dd-l { color: var(--muted); }
+.tl-plan.tl-leave { z-index: 2; background: repeating-linear-gradient(135deg, var(--surface) 0 6px, var(--nonwork) 6px 12px) !important; border: 1.5px dashed var(--muted) !important; color: var(--muted) !important; box-shadow: none !important; }
 .track i { display: block; height: 100%; width: 0; background: var(--accent); }
 
 /* lists */
@@ -459,7 +488,7 @@ h3 { font-weight: 600; }
 /* merged day detail */
 .dd-head { align-items: baseline; }
 .dd-total { font-size: 20px; font-weight: 600; }
-.list.dd .row { grid-template-columns: 8.4em 8em minmax(0, 1fr) 3em 2.6em; gap: 8px; padding: 7px 0; font-size: 14px; }
+.list.dd .row { grid-template-columns: 8.4em 9.6em minmax(0, 1fr) 3em 4.8em; gap: 8px; padding: 7px 0; font-size: 14px; }
 .list.dd .row.sub { padding-top: 0; border-top: 0; }
 .dd-rec { border-top: 1px dashed var(--line); padding-top: 4px; }
 .dd-t { font-family: var(--font-num); font-size: 13px; color: var(--muted); white-space: nowrap; }
@@ -560,13 +589,23 @@ h3 { font-weight: 600; }
           <div class="wk-big num" id="wkBig">--:--:--</div>
         </div>
         <p class="small wk-hint" id="wkHint" hidden></p>
+        <div class="away-note" id="awayNote" hidden></div>
         <button class="btn-work" id="wkBtn" type="button">开始工作</button>
+        <div class="wk-stop" id="wkStop" hidden>
+          <button class="linkbtn" id="wkStopBtn" type="button">忘了点结束？</button>
+          <div class="wk-stop-form" id="wkStopForm" hidden>
+            <label class="small">其实 <input class="input time-in" id="wkStopAt" type="time"> 就停了</label>
+            <button class="btn primary mini" id="wkStopOk" type="button">按这个时间下班</button>
+            <button class="linkbtn" id="wkStopCancel" type="button">算了</button>
+          </div>
+        </div>
         <div class="wk-dots" id="wkChips"></div>
         <div class="wk-foot">
           <button class="linkbtn rules-btn" id="rulesBtn" type="button" aria-expanded="false" aria-controls="rulesPop"><span class="qmark" aria-hidden="true">?</span>积分规则</button>
-          <button class="linkbtn" id="offToday" type="button">今天请假</button>
+          <button class="linkbtn" id="leaveBtn" type="button" aria-expanded="false" aria-controls="leavePanel">请假</button>
         </div>
         <div class="rules-pop" id="rulesPop" hidden></div>
+        <div class="leave-pop" id="leavePanel" hidden></div>
       </section>
 
       <section class="card tl-card" aria-labelledby="tlTitle">
@@ -670,7 +709,8 @@ h3 { font-weight: 600; }
         </div>
         <ul class="list dd" id="attList"></ul>
         <ul class="list dd dd-rec" id="recordList"></ul>
-        <div class="btn-row dd-foot"><button class="linkbtn" id="backToday" type="button" hidden>回到今天</button><button class="linkbtn" id="offDay" type="button">这天请假</button></div>
+        <ul class="list dd dd-trash" id="trashList" hidden></ul>
+        <div class="btn-row dd-foot"><button class="linkbtn" id="backToday" type="button" hidden>回到今天</button></div>
       </div>
     </div>
   </section>
@@ -693,13 +733,15 @@ const BLOCK_TYPES = ['work', 'meal', 'exercise', 'rest', 'other'];
 const BLOCK_LABELS = { work: '工作', meal: '吃饭', exercise: '运动', rest: '休息', other: '其他' };
 const RULE_FIELDS = [
   ['onTime', '准时奖', 0, 100], ['full', '做满到下班奖', 0, 100], ['missPer10', '迟到早退每 10 分钟扣', 0, 100], ['missCap', '每段最多扣', 0, 500],
-  ['absent', '整段缺勤扣', 0, 500], ['overtimePer10', '加班每满 10 分钟奖', 0, 100], ['overtimeCapMin', '加班每天最多算（分钟）', 0, 600], ['remindBeforeMin', '上班前几分钟提醒', 0, 60],
+  ['absent', '整段缺勤扣', 0, 500], ['overtimePer10', '加班每满 10 分钟奖', 0, 100], ['overtimeCapMin', '加班每天最多算（分钟）', 0, 720], ['overtimeHalfAfterMin', '加班超过几分钟后减半（0 不减半）', 0, 720], ['remindBeforeMin', '上班前几分钟提醒', 0, 60],
 ];
 const DEFAULT_CONFIG = {
   dailyGoal: 60,
   comebackWindowMin: 10,
   overrunPerMin: 1,
   overrunCapMin: 30,
+  leaveFreeMin: 240,
+  leavePerHour: 10,
   tasks: [
     { id: 'wake', kind: 'morning', name: '醒来第一件事', note: '在碰手机之前完成', fish: 15, repeat: { type: 'daily' } },
     { id: 'plan', name: '写下今天最重要的三件事', note: '写在纸上或备忘录里都行', fish: 5, repeat: { type: 'daily' } },
@@ -734,7 +776,7 @@ const DEFAULT_CONFIG = {
       { id: 'b-rest', name: '晚饭和休息', start: '20:00', end: '24:00', type: 'rest' },
     ],
   },
-  attendance: { onTime: 10, full: 10, missPer10: 5, missCap: 20, absent: 30, overtimePer10: 2, overtimeCapMin: 60, remindBeforeMin: 5 },
+  attendance: { onTime: 10, full: 10, missPer10: 5, missCap: 20, absent: 30, overtimePer10: 2, overtimeCapMin: 240, overtimeHalfAfterMin: 120, remindBeforeMin: 5 },
 };
 
 // ---------- storage ----------
@@ -759,6 +801,7 @@ function migrate(raw) {
   d.version = 3;
   d.timer = d.timer || null;
   d.work = d.work || null;
+  d.away = d.away || null;
   return d;
 }
 function loadData() {
@@ -871,6 +914,58 @@ function dayDoc(key) {
   return d;
 }
 function isOff(key) { return !!(data.days[key] && data.days[key].off); }
+// Leave: time ranges on a day (day.leaves). Each week the first leaveFreeMin minutes that fall on work blocks are free;
+// past that, every hour costs leavePerHour fish (charged by the minute, rounded up), on the day that went over.
+function leavesOf(key) {
+  const d = data.days[key];
+  const out = [];
+  if (d && d.leaves) for (const id of Object.keys(d.leaves)) { const x = d.leaves[id]; if (x && x.s < x.e) out.push({ id, s: x.s, e: x.e }); }
+  return out.sort((a, b) => a.s - b.s);
+}
+function leaveFreeMs() { const v = Number(cfg().leaveFreeMin); return (Number.isFinite(v) && v >= 0 ? v : 240) * 60000; }
+function leavePerHour() { const v = Number(cfg().leavePerHour); return Number.isFinite(v) && v >= 0 ? v : 10; }
+// [lo, hi] with the cut ranges taken out.
+function subtractAll(lo, hi, cuts) {
+  let parts = [[lo, hi]];
+  for (const c of cuts) {
+    const next = [];
+    for (const [a, b] of parts) {
+      if (c.e <= a || c.s >= b) { next.push([a, b]); continue; }
+      if (c.s > a) next.push([a, c.s]);
+      if (c.e < b) next.push([c.e, b]);
+    }
+    parts = next;
+  }
+  return parts.filter(([a, b]) => b > a);
+}
+// A work block with leave taken out: the effective start (after a leave at the start), end (before a leave at the end)
+// and the pieces still to work. pieces is empty when leave covers the whole block.
+function effBlock(b, leaves) {
+  const lv = leaves.filter((l) => l.e > b.s && l.s < b.e);
+  const pieces = subtractAll(b.s, b.e, lv);
+  const leaveMs = unionWithin(lv, b.s, b.e);
+  return { lv, leaveMs, pieces, es: pieces.length ? pieces[0][0] : b.e, ee: pieces.length ? pieces[pieces.length - 1][1] : b.e };
+}
+function leaveMsOf(key) {
+  const L = leavesOf(key);
+  if (!L.length || isOff(key)) return 0;
+  return blocksOf(key).filter((b) => b.type === 'work').reduce((sum, b) => sum + unionWithin(L, b.s, b.e), 0);
+}
+function leaveFeeFor(ms) { return Math.ceil(Math.max(0, ms - leaveFreeMs()) / 60000 * leavePerHour() / 60 - 1e-9); }
+function leaveWeek(key) {
+  const start = weekStartOf(key);
+  let used = 0;
+  const days = {};
+  for (let i = 0; i < 7; i++) {
+    const k = addDays(start, i);
+    const ms = leaveMsOf(k);
+    const before = leaveFeeFor(used);
+    used += ms;
+    days[k] = { ms, fee: leaveFeeFor(used) - before };
+  }
+  return { used, days };
+}
+function leaveAt(key, ts) { return leavesOf(key).find((l) => l.s <= ts && l.e > ts) || null; }
 function eventsOf(day) {
   const out = [];
   const evs = day && day.events && typeof day.events === 'object' ? day.events : {};
@@ -958,17 +1053,24 @@ function scoreDay(key, now) {
   const blocks = blocksOf(key, p).filter((b) => b.type === 'work');
   const sess = sessionsOf(key, now);
   const res = { key, off, scheduled: p.scheduled, rules, blocks: [], pos: 0, neg: 0, overtimeMs: 0, overtimeFish: 0, net: 0 };
+  const leaves = off ? [] : leavesOf(key);
+  res.leaveMs = 0;
   for (const b of blocks) {
-    const r = { b, state: now < b.s ? 'upcoming' : now < b.e ? 'ongoing' : 'done', fish: 0, ignored: off || b.s < enabledAt };
-    const atStart = sess.find((x) => x.s <= b.s && x.e > b.s);
-    const firsts = sess.filter((x) => x.e > b.s && x.s < b.e).map((x) => Math.max(x.s, b.s));
+    const eb = effBlock(b, leaves);
+    const es = eb.es;
+    const ee = eb.ee;
+    res.leaveMs += eb.leaveMs;
+    const r = { b, es, ee, leaveMs: eb.leaveMs, leaveAll: !off && eb.lv.length > 0 && !eb.pieces.length, state: now < es ? 'upcoming' : now < ee ? 'ongoing' : 'done', fish: 0, ignored: off || b.s < enabledAt || !eb.pieces.length };
+    const atStart = sess.find((x) => x.s <= es && x.e > es);
+    const firsts = sess.filter((x) => x.e > es && x.s < ee).map((x) => Math.max(x.s, es));
     r.onTime = !!atStart;
     r.clockIn = atStart ? atStart.s : firsts.length ? Math.min(...firsts) : null;
-    r.lateMs = r.onTime ? 0 : (r.clockIn || Math.min(now, b.e)) - b.s;
-    r.coveredMs = unionWithin(sess, b.s, Math.min(b.e, now));
+    r.lateMs = r.onTime ? 0 : (r.clockIn || Math.min(now, ee)) - es;
+    r.coveredMs = eb.pieces.reduce((sum, [a, z]) => sum + unionWithin(sess, a, Math.min(z, now)), 0);
     if (r.state === 'done' && !r.ignored) {
-      r.full = sess.some((x) => x.s < b.e && x.e >= b.e);
-      r.missMs = b.e - b.s - r.coveredMs;
+      r.full = sess.some((x) => x.by !== 'auto' && x.s < ee && x.e >= ee);
+      r.autoPending = !r.full && sess.some((x) => x.by === 'auto' && x.s < ee && x.e >= ee);
+      r.missMs = eb.pieces.reduce((sum, [a, z]) => sum + z - a, 0) - r.coveredMs;
       r.absent = r.coveredMs <= 0;
       if (r.absent) {
         r.fish = -rules.absent;
@@ -986,20 +1088,24 @@ function scoreDay(key, now) {
   }
   const counted = off ? [] : blocks;
   for (const x of sess) {
-    if (x.open) continue;
+    if (x.open || x.by === 'auto') continue;
     let inside = 0;
     for (const b of counted) inside += unionWithin([x], b.s, b.e);
     res.overtimeMs += x.e - x.s - inside;
   }
+  // Every full 10 minutes earns overtimePer10; past overtimeHalfAfterMin each 10 minutes earns half; nothing past the cap.
   const units = Math.floor(Math.min(res.overtimeMs, rules.overtimeCapMin * 60000) / 600000);
-  res.overtimeFish = units * rules.overtimePer10;
+  const halfAfter = Number(rules.overtimeHalfAfterMin) || 0;
+  const fullUnits = halfAfter > 0 ? Math.floor(halfAfter / 10) : units;
+  res.overtimeFish = Math.round(Math.min(units, fullUnits) * rules.overtimePer10 + Math.max(0, units - fullUnits) * rules.overtimePer10 / 2);
   res.pos += res.overtimeFish;
   res.net = res.pos - res.neg;
   return res;
 }
 
 function computeTotals(now) {
-  const t = { earned: 0, spent: 0, attPos: 0, attNeg: 0, balance: 0, lifetime: 0, netByDay: {}, earnedByDay: {}, lifeByDay: {}, spentByDay: {}, attByDay: {}, firstKey: null };
+  const t = { earned: 0, spent: 0, leaveFee: 0, attPos: 0, attNeg: 0, balance: 0, lifetime: 0, netByDay: {}, earnedByDay: {}, lifeByDay: {}, spentByDay: {}, leaveFeeByDay: {}, attByDay: {}, firstKey: null };
+  const weeks = {};
   const keys = new Set(Object.keys(data.days));
   const startKey = dayKeyOf(cfg().schedule.enabledAt || Date.now());
   for (let k = startKey; k <= lastDay; k = addDays(k, 1)) keys.add(k);
@@ -1015,6 +1121,11 @@ function computeTotals(now) {
       else if (e.kind === 'earn') earned += f;
     }
     const sc = scoreDay(key, now);
+    const ws = weekStartOf(key);
+    if (!weeks[ws]) weeks[ws] = leaveWeek(key);
+    const fee = weeks[ws].days[key] ? weeks[ws].days[key].fee : 0;
+    t.leaveFee += fee;
+    t.leaveFeeByDay[key] = fee;
     // 生活奖励 goes into the balance and lifetime, but not into the day's 开工 score.
     t.earned += earned + life;
     t.spent += spent;
@@ -1028,7 +1139,7 @@ function computeTotals(now) {
     const active = earned || life || spent || sc.pos || sc.neg || sessionsOf(key, now).length;
     if (active && (!t.firstKey || key < t.firstKey)) t.firstKey = key;
   }
-  t.balance = t.earned + t.attPos - t.attNeg - t.spent;
+  t.balance = t.earned + t.attPos - t.attNeg - t.spent - t.leaveFee;
   t.lifetime = t.earned + t.attPos;
   return t;
 }
@@ -1090,7 +1201,13 @@ function upcomingWork(now, daysAhead) {
     const key = addDays(base, i);
     const p = i === 0 ? planFor(key) : planFromConfig(key);
     if (!p.scheduled || isOff(key)) continue;
-    for (const b of blocksOf(key, p)) if (b.type === 'work') out.push(Object.assign({ key, dayIndex: i }, b));
+    const L = leavesOf(key);
+    for (const b of blocksOf(key, p)) {
+      if (b.type !== 'work') continue;
+      const eb = effBlock(b, L);
+      if (!eb.pieces.length) continue;
+      out.push(Object.assign({ key, dayIndex: i }, b, { s: eb.es, e: eb.ee, start: hhmm(eb.es), end: hhmm(eb.ee) }));
+    }
   }
   return out.sort((a, b) => a.s - b.s);
 }
@@ -1101,7 +1218,10 @@ function dayContext(now) {
   const enabledAt = cfg().schedule.enabledAt || 0;
   const cur = blocks.find((b) => now >= b.s && now < b.e) || null;
   const next = upcomingWork(now, 8).find((b) => b.s > now) || null;
-  return { key, off, scheduled: planFor(key).scheduled, blocks, cur, curCounts: !!cur && cur.type === 'work' && cur.s >= enabledAt, next };
+  const leaveNow = off ? null : leaveAt(key, now);
+  const eb = cur && cur.type === 'work' ? effBlock(cur, leavesOf(key)) : null;
+  const curCounts = !!eb && eb.pieces.length > 0 && cur.s >= enabledAt && !leaveNow && now >= eb.es && now < eb.ee;
+  return { key, off, scheduled: planFor(key).scheduled, blocks, cur, curStart: eb ? eb.es : null, curCounts, leaveNow, next };
 }
 
 // ---------- DOM helpers ----------
@@ -1178,17 +1298,33 @@ function clockIn() {
   const start = nowSec();
   const id = newId('w');
   data.work = { id, start };
+  if (data.away && !data.away.back) data.away.back = start;
+  // Back early from leave: the leave ends now, and the unused part goes back to the week's quota.
+  const lkey = dayKeyOf(start);
+  const lv = leaveAt(lkey, start);
+  let leaveOld = null;
+  if (lv) {
+    const L = dayDoc(lkey).leaves;
+    leaveOld = { id: lv.id, v: Object.assign({}, L[lv.id]) };
+    if (start - lv.s < 60000) delete L[lv.id];
+    else L[lv.id] = Object.assign({}, L[lv.id], { e: start });
+  }
   save();
   render();
   pushStatus(true);
-  pushReminders(false);
+  pushReminders(true);
   const ctx = dayContext(start);
   let msg = '上班打卡 ' + hhmmss(start);
-  if (ctx.curCounts) msg += '，' + ctx.cur.name + '迟到 ' + durText(start - ctx.cur.s);
+  if (leaveOld) msg += '，请假提前结束，退回 ' + durMin(leaveOld.v.e - start) + '额度';
+  else if (ctx.curCounts) msg += '，' + ctx.cur.name + '迟到 ' + durText(start - ctx.curStart);
   else if (ctx.next && ctx.next.s - start <= 3600000) msg += '，' + ctx.next.name + '准时';
   else msg += '，算加班';
   showToast(pre + msg, () => {
-    if (data.work && data.work.id === id) { data.work = null; save(); render(); pushStatus(true); pushReminders(false); }
+    if (data.work && data.work.id === id) {
+      data.work = null;
+      if (leaveOld) dayDoc(lkey).leaves[leaveOld.id] = leaveOld.v;
+      save(); render(); pushStatus(true); pushReminders(true);
+    }
   });
 }
 function clockOut() {
@@ -1196,8 +1332,7 @@ function clockOut() {
   if (!w) return;
   const now = nowSec();
   const plan = sessionPlan(w);
-  if (now > plan.limit) finishSession(w, plan.autoEnd, 'auto', '超过 ' + hhmm(plan.limit) + ' 才点，按 ' + hhmm(plan.autoEnd) + ' 下班记。');
-  else finishSession(w, now, 'user', '下班打卡 ' + hhmmss(now) + (plan.blockEnd && now > plan.blockEnd ? '，加班 ' + durText(now - plan.blockEnd) : ''));
+  finishSession(w, now, 'user', '下班打卡 ' + hhmmss(now) + (plan.blockEnd && now > plan.blockEnd ? '，加班 ' + durText(now - plan.blockEnd) : ''));
 }
 function finishSession(w, end, by, text) {
   const key = dayKeyOf(w.start);
@@ -1224,18 +1359,195 @@ function deleteSession(key, id) {
   if (!d || !d.sessions || !d.sessions[id]) return;
   const old = d.sessions[id];
   delete d.sessions[id];
+  if (!d.trash) d.trash = {};
+  d.trash[id] = { type: 'session', data: old, at: Date.now() };
   save();
   render();
-  showToast('删掉了一段工作记录。', () => { dayDoc(key).sessions[id] = old; save(); render(); });
+  showToast('删掉了一段工作记录，今天之内可以在下面「刚删掉的」里恢复。', () => restoreTrash(key, id));
 }
-function toggleOff(key) {
+function restoreTrash(key, id) {
+  const d = data.days[key];
+  const t = d && d.trash && d.trash[id];
+  if (!t) return;
+  if (t.type === 'session') dayDoc(key).sessions[id] = t.data;
+  else dayDoc(key).events[id] = t.data;
+  delete d.trash[id];
+  save();
+  render();
+  showToast('恢复了。');
+}
+
+// "HH:MM" on a day key to a timestamp; times before 04:00 belong to the night after that date.
+function hmToTs(key, hm) {
+  if (!/^\d{1,2}:\d{2}$/.test(hm || '')) return null;
+  let ts = tsOf(key, hm);
+  if (ts < tsOf(key, '04:00')) ts += 86400000;
+  return ts;
+}
+function stopAtChosen() {
+  const w = data.work;
+  if (!w) return;
+  const ts = hmToTs(dayKeyOf(w.start), $('wkStopAt').value);
+  const now = Date.now();
+  if (ts === null || ts <= w.start || ts > now) { showToast('要填 ' + hhmm(w.start) + ' 到现在之间的时间。'); return; }
+  $('wkStopForm').hidden = true;
+  finishSession(w, ts, 'user', '按 ' + hhmm(ts) + ' 下班记了。');
+  const d = data.days[dayKeyOf(w.start)];
+  if (d && d.sessions[w.id]) { d.sessions[w.id].edited = true; save(); render(); }
+}
+// Today's records can only be shortened: a later start or an earlier end, never longer than what was clocked.
+let editSess = '';
+function saveSessEdit(key, id) {
+  const d = data.days[key];
+  const x = d && d.sessions && d.sessions[id];
+  if (!x) return;
+  const s = hmToTs(key, $('es-s').value);
+  const e = hmToTs(key, $('es-e').value);
+  const okS = s !== null && s >= Math.floor(x.start / 60000) * 60000;
+  const okE = e !== null && e <= x.end;
+  if (!okS || !okE || e <= s) { showToast('只能往里改：开始不早于 ' + hhmm(x.start) + '，结束不晚于 ' + hhmm(x.end) + '。'); return; }
+  const old = Object.assign({}, x);
+  d.sessions[id] = Object.assign({}, x, { start: Math.max(s, x.start), end: e, edited: true, by: 'user' });
+  editSess = '';
+  save();
+  render();
+  showToast('改成 ' + hhmm(d.sessions[id].start) + '–' + hhmm(e) + ' 了。', () => { dayDoc(key).sessions[id] = old; save(); render(); });
+}
+
+// Leave panel: pick a day this week, then a whole day, some blocks, or a span of hours.
+let leaveDraft = null;
+function leaveDays() {
+  const out = [];
+  const end = addDays(weekStartOf(lastDay), 6);
+  for (let k = lastDay; k <= end; k = addDays(k, 1)) {
+    const p = k === lastDay ? planFor(k) : planFromConfig(k);
+    const now = Date.now();
+    const bl = blocksOf(k, p).filter((b) => b.type === 'work' && (k === lastDay || b.e > now));
+    if (p.scheduled && bl.length && !isOff(k)) out.push({ key: k, blocks: bl });
+  }
+  return out;
+}
+function dayLabel(k) { return k === lastDay ? '今天' : k === addDays(lastDay, 1) ? '明天' : '周' + WD_MON[isoWeekday(k) - 1]; }
+// The ranges the draft asks for. Today's earlier hours can be back-filled, but never over time that was clocked as work.
+function draftRanges(raw) {
+  const dr = leaveDraft;
+  if (!dr) return [];
+  const day = leaveDays().find((x) => x.key === dr.day);
+  if (!day) return [];
+  let out = [];
+  if (dr.mode === 'day') out = day.blocks.map((b) => ({ s: b.s, e: b.e }));
+  else if (dr.mode === 'blocks') out = day.blocks.filter((b) => dr.blocks.includes(b.id)).map((b) => ({ s: b.s, e: b.e }));
+  else {
+    const s = hmToTs(dr.day, dr.start);
+    if (s !== null) out = [{ s, e: s + dr.mins * 60000 }];
+  }
+  out = out.filter((r) => r.e > r.s);
+  if (raw || dr.day !== lastDay) return out;
+  const worked = sessionsOf(lastDay, Date.now()).map((x) => ({ s: x.s, e: x.e }));
+  return out.flatMap((r) => subtractAll(r.s, r.e, worked).map(([a, z]) => ({ s: a, e: z }))).filter((r) => r.e - r.s >= 60000);
+}
+function newLeaveMs(key, ranges) {
+  const L = leavesOf(key).concat(ranges);
+  const before = leaveMsOf(key);
+  const after = blocksOf(key, key === lastDay ? planFor(key) : planFromConfig(key)).filter((b) => b.type === 'work').reduce((sum, b) => sum + unionWithin(L, b.s, b.e), 0);
+  return Math.max(0, after - before);
+}
+function renderLeavePanel() {
+  const panel = $('leavePanel');
+  if (panel.hidden) return;
+  const days = leaveDays();
+  const wk = leaveWeek(lastDay);
+  const free = leaveFreeMs();
+  if (!leaveDraft || !days.some((d) => d.key === leaveDraft.day)) {
+    const first = days[0];
+    const nextHalf = Math.ceil(Date.now() / 1800000) * 1800000;
+    leaveDraft = { day: first ? first.key : '', mode: 'hours', blocks: [], start: first ? hhmm(Math.max(first.blocks[0].s, first.key === lastDay ? nextHalf : 0)) : '09:00', mins: 60 };
+  }
+  const dr = leaveDraft;
+  const kids = [h('div', { class: 'leave-head' }, h('b', { text: '请假' }), h('span', { class: 'muted small', text: '本周已请 ' + (wk.used ? durMin(wk.used) : '0') + '，每周 ' + durMin(free) + '内不扣' }))];
+  if (!days.length) kids.push(h('p', { class: 'muted small', text: '这周剩下的日子没有工作时段了。' }));
+  else {
+    kids.push(h('div', { class: 'leave-line' }, h('span', { class: 'leave-k', text: '哪天' }), h('div', { class: 'chips-s' }, ...days.map((d) => h('button', { type: 'button', class: 'pill' + (d.key === dr.day ? ' on' : ''), 'data-lday': d.key, text: dayLabel(d.key) + ' ' + Number(d.key.slice(5, 7)) + '/' + Number(d.key.slice(8)) })))));
+    kids.push(h('div', { class: 'leave-line' }, h('span', { class: 'leave-k', text: '多久' }), h('div', { class: 'chips-s' }, ...[['hours', '按小时'], ['blocks', '按时段'], ['day', '整天']].map(([m, t]) => h('button', { type: 'button', class: 'pill' + (dr.mode === m ? ' on' : ''), 'data-lmode': m, text: t })))));
+    const day = days.find((d) => d.key === dr.day);
+    if (dr.mode === 'blocks') kids.push(h('div', { class: 'leave-line' }, h('span', { class: 'leave-k' }), h('div', { class: 'chips-s' }, ...day.blocks.map((b) => h('button', { type: 'button', class: 'pill' + (dr.blocks.includes(b.id) ? ' on' : ''), 'data-lblock': b.id, text: (String(b.name).replace(/工作$/, '') || b.name) + ' ' + shortHM(b.start) + '–' + shortHM(b.end) })))));
+    if (dr.mode === 'hours') {
+      const sel = h('select', { class: 'input', id: 'lvMins' }, ...[30, 60, 90, 120, 180, 240].map((m) => { const o = h('option', { value: String(m), text: durMin(m * 60000) }); if (m === dr.mins) o.selected = true; return o; }));
+      const st = inp('lvStart', dr.start, { type: 'time', class: 'input time-in' });
+      kids.push(h('div', { class: 'leave-line' }, h('span', { class: 'leave-k' }), h('label', { class: 'small leave-hours' }, '从 ', st, ' 开始，请 ', sel)));
+    }
+    const ranges = draftRanges();
+    const rawRanges = draftRanges(true);
+    const add = newLeaveMs(dr.day, ranges);
+    const fee = leaveFeeFor(wk.used + add) - leaveFeeFor(wk.used);
+    const cut = rawRanges.reduce((n, r) => n + r.e - r.s, 0) - ranges.reduce((n, r) => n + r.e - r.s, 0);
+    let msg;
+    if (dr.mode === 'blocks' && !dr.blocks.length) msg = '选一个或几个时段。';
+    else if (!ranges.length) msg = rawRanges.length ? '这段时间你一直在工作，不用请。' : '时间不对，换一个。';
+    else if (!add) msg = '这段时间没有要上的班（或已经请过了），不用请。';
+    else msg = '请 ' + ranges.map((r) => hhmm(r.s) + '–' + hhmm(r.e)).join('、') + (cut >= 60000 ? '（你在工作的 ' + durMin(cut) + ' 不算）' : '') + '，占工作时间 ' + durMin(add) + '，' + (fee ? '超出每周额度，扣 ' + fee + ' 条小鱼干。' : '在每周额度内，不扣小鱼干。');
+    kids.push(h('p', { class: 'small leave-msg' + (fee ? ' warn' : ''), text: msg }));
+    kids.push(h('div', { class: 'btn-row' }, h('button', { type: 'button', class: 'btn primary mini', id: 'lvOk', disabled: !add, text: fee ? '请假，扣 ' + fee + ' 条' : '请假' })));
+  }
+  // This week's leave, with 取消 for anything not over yet.
+  const list = [];
+  const start = weekStartOf(lastDay);
+  for (let i = 0; i < 7; i++) {
+    const k = addDays(start, i);
+    for (const l of leavesOf(k)) {
+      const can = k >= lastDay;
+      list.push(h('li', { class: 'leave-item' }, h('span', { text: dayLabel(k) === '今天' ? '今天' : fmtMD(k) + ' 周' + WD_MON[isoWeekday(k) - 1] }), h('span', { class: 'num', text: hhmm(l.s) + '–' + hhmm(l.e) }), can ? h('button', { type: 'button', class: 'linkbtn', 'data-lcancel': l.id, 'data-key': k, text: '取消' }) : h('span', { class: 'muted small', text: '已过' })));
+    }
+  }
+  if (list.length) kids.push(h('div', { class: 'leave-list' }, h('span', { class: 'leave-k', text: '本周的假' }), h('ul', null, ...list)));
+  panel.replaceChildren(...kids);
+}
+function onLeaveClick(ev) {
+  const el = ev.target.closest('button');
+  if (!el || !leaveDraft) return;
+  if (el.dataset.lday) { leaveDraft.day = el.dataset.lday; leaveDraft.blocks = []; const d = leaveDays().find((x) => x.key === el.dataset.lday); if (d) leaveDraft.start = hhmm(Math.max(d.blocks[0].s, d.key === lastDay ? Math.ceil(Date.now() / 1800000) * 1800000 : 0)); }
+  else if (el.dataset.lmode) leaveDraft.mode = el.dataset.lmode;
+  else if (el.dataset.lblock) { const b = el.dataset.lblock; leaveDraft.blocks = leaveDraft.blocks.includes(b) ? leaveDraft.blocks.filter((x) => x !== b) : leaveDraft.blocks.concat(b); }
+  else if (el.id === 'lvOk') { takeLeave(); return; }
+  else if (el.dataset.lcancel) { cancelLeave(el.dataset.key, el.dataset.lcancel); return; }
+  else return;
+  renderLeavePanel();
+}
+function onLeaveChange(ev) {
+  if (!leaveDraft) return;
+  if (ev.target.id === 'lvStart') leaveDraft.start = ev.target.value;
+  else if (ev.target.id === 'lvMins') leaveDraft.mins = Number(ev.target.value) || 60;
+  else return;
+  renderLeavePanel();
+}
+function takeLeave() {
+  const key = leaveDraft.day;
+  const ranges = draftRanges();
+  const add = newLeaveMs(key, ranges);
+  if (!ranges.length || !add) return;
+  const wk = leaveWeek(lastDay);
+  const fee = leaveFeeFor(wk.used + add) - leaveFeeFor(wk.used);
   const d = dayDoc(key);
-  d.off = !d.off;
+  if (!d.leaves) d.leaves = {};
+  const ids = ranges.map((r) => { const id = newId('l'); d.leaves[id] = { s: r.s, e: r.e, at: Date.now() }; return id; });
+  save();
+  leaveDraft = null;
+  render();
+  pushReminders(true);
+  pushStatus(true);
+  const when = ranges.map((r) => hhmm(r.s) + '–' + hhmm(r.e)).join('、');
+  showToast(dayLabel(key) + ' ' + when + ' 请假了' + (fee ? '，扣 ' + fee + ' 条' : '') + '。', () => { const dd = data.days[key]; if (dd && dd.leaves) ids.forEach((id) => delete dd.leaves[id]); save(); render(); pushReminders(true); });
+}
+function cancelLeave(key, id) {
+  const d = data.days[key];
+  if (!d || !d.leaves || !d.leaves[id]) return;
+  const old = d.leaves[id];
+  delete d.leaves[id];
   save();
   render();
   pushReminders(true);
   pushStatus(true);
-  showToast(d.off ? fmtMD(key) + '算请假，这天的工作时段不计考勤。' : fmtMD(key) + '取消请假了。');
+  showToast('取消了 ' + hhmm(old.s) + '–' + hhmm(old.e) + ' 的假。', () => { dayDoc(key).leaves = Object.assign(dayDoc(key).leaves || {}, { [id]: old }); save(); render(); pushReminders(true); });
 }
 
 // ---------- tasks, rewards, breaks ----------
@@ -1324,10 +1636,13 @@ function confetti(x, y) {
   }
   setTimeout(() => layer.remove(), 1900);
 }
-function undoEvents(key, ids) {
+function undoEvents(key, ids, keep) {
   const d = data.days[key];
   if (!d || !d.events) return;
-  ids.forEach((id) => { delete d.events[id]; });
+  ids.forEach((id) => {
+    if (keep && d.events[id]) { if (!d.trash) d.trash = {}; d.trash[id] = { type: 'event', data: d.events[id], at: Date.now() }; }
+    delete d.events[id];
+  });
   if (data.timer && ids.includes(data.timer.spendId)) data.timer = null;
   save();
   render();
@@ -1424,6 +1739,87 @@ function pushReminders(force) {
   lastRemindersSig = sig;
   post('reminders', list);
 }
+// Away from the computer: 30 minutes with no keyboard or mouse ends the work record at the last input.
+// Coming back within 2 hours on the same day picks the clock up again; a note asks whether the gap was work.
+const AWAY_MS = 30 * 60000;
+const RESUME_MAX_MS = 2 * 3600000;
+function awayFrom(w, endTs) {
+  const end = Math.max(w.start, endTs);
+  const key = dayKeyOf(w.start);
+  finishSession(w, end, 'idle', null);
+  data.away = { key, sessId: w.id, from: end, back: null, resumedId: null };
+  save();
+  render();
+}
+function comeBack(at) {
+  const a = data.away;
+  if (!a || a.back) return;
+  a.back = at;
+  if (!data.work && at - a.from <= RESUME_MAX_MS && dayKeyOf(at) === a.key) {
+    const id = newId('w');
+    data.work = { id, start: at, lastActive: at };
+    a.resumedId = id;
+    pushStatus(true);
+    pushReminders(false);
+  }
+  save();
+  render();
+}
+window.xygIdle = (sec) => {
+  const now = Date.now();
+  let activeAt = now - Math.max(0, Number(sec) || 0) * 1000;
+  if (activeTimer()) activeAt = now; // a redeemed break is not "away"
+  const w = data.work;
+  if (w) {
+    const last = Math.max(w.lastActive || w.start, w.start);
+    if (now - activeAt >= AWAY_MS) { awayFrom(w, Math.max(last, activeAt)); return; }
+    if (activeAt - last >= AWAY_MS) { awayFrom(w, last); comeBack(activeAt); return; }
+    const moved = activeAt - (w.savedActive || 0) >= 60000;
+    w.lastActive = Math.max(last, activeAt);
+    if (moved) { w.savedActive = w.lastActive; save(); }
+  } else if (data.away && !data.away.back && now - activeAt < 60000) comeBack(activeAt);
+};
+function awayCount() {
+  const a = data.away;
+  if (!a) return;
+  const d = data.days[a.key];
+  const prev = d && d.sessions && d.sessions[a.sessId];
+  if (prev) {
+    if (a.resumedId && data.work && data.work.id === a.resumedId) { data.work.start = prev.start; delete d.sessions[a.sessId]; }
+    else if (a.resumedId && d.sessions[a.resumedId]) { d.sessions[a.resumedId].start = prev.start; delete d.sessions[a.sessId]; }
+    else if (a.back) d.sessions[a.sessId] = Object.assign({}, prev, { end: a.back });
+  }
+  data.away = null;
+  save();
+  render();
+  pushStatus(true);
+  showToast('那段时间算工作了。');
+}
+function awayDrop(discardResume) {
+  const a = data.away;
+  if (!a) return;
+  if (discardResume && a.resumedId && data.work && data.work.id === a.resumedId) { data.work = null; pushStatus(true); pushReminders(false); }
+  data.away = null;
+  save();
+  render();
+}
+function renderAway() {
+  const a = data.away;
+  const box = $('awayNote');
+  if (a && a.key !== lastDay) { data.away = null; save(); }
+  if (!data.away) { box.hidden = true; return; }
+  box.hidden = false;
+  const gap = a.back ? hhmm(a.from) + '–' + hhmm(a.back) + ' 电脑没动（' + durMin(a.back - a.from) + '）' : hhmm(a.from) + ' 起电脑没动了';
+  const kids = [h('p', { class: 'small', text: gap + '，工作记到 ' + hhmm(a.from) + '。' })];
+  if (a.back) {
+    kids.push(h('p', { class: 'small', text: '那段时间你在工作吗？不选就不算。' + (a.resumedId && data.work && data.work.id === a.resumedId ? '回来后已经接着计时了。' : '') }));
+    const btns = [h('button', { class: 'btn primary mini', type: 'button', 'data-away': 'count', text: '算工作' }), h('button', { class: 'linkbtn', type: 'button', 'data-away': 'drop', text: '不算' })];
+    if (a.resumedId && data.work && data.work.id === a.resumedId) btns.push(h('button', { class: 'linkbtn', type: 'button', 'data-away': 'leave', text: '我不是回来工作的' }));
+    kids.push(h('div', { class: 'btn-row' }, ...btns));
+  }
+  box.replaceChildren(...kids);
+}
+
 window.xygAction = (action) => {
   if (action === 'clockIn') { if (!data.work) clockIn(); }
   else if (action === 'clockOut') { if (data.work) clockOut(); }
@@ -1909,7 +2305,7 @@ function blockChip(r, compact) {
   let cls = '';
   let pts = '';
   let tip = b.name + ' ' + b.start + '–' + b.end;
-  if (r.ignored) tip += isOff(dayKeyOf(b.s)) ? '，请假' : '，不计';
+  if (r.ignored) tip += isOff(dayKeyOf(b.s)) || r.leaveAll ? '，请假' : '，不计';
   else if (r.state === 'ongoing') { cls = r.onTime ? 'live' : 'bad'; tip += r.onTime ? '，准时 ' + hhmm(r.clockIn) : r.clockIn ? '，迟到 ' + durText(r.lateMs) : '，还没打卡'; }
   else if (r.state === 'done') { cls = r.fish >= 0 ? 'good' : 'bad'; pts = signed(r.fish); tip += r.absent ? '，缺勤' : (r.onTime ? '，准时' : '，迟到') + (r.full ? '，做满' : '，早退'); }
   return h('span', { class: 'wk-dot ' + cls, title: tip }, h('i'), short, pts ? h('b', { class: 'num', text: pts }) : null);
@@ -1932,14 +2328,17 @@ function renderClock() {
     big.classList.add('is-working');
     hint = '';
     if (plan.blockEnd && now < plan.blockEnd) label = plan.block.name + ' · 到 ' + plan.block.end;
-    else if (plan.blockEnd) { label = '加班中'; hint = hhmm(plan.limit) + ' 前不点结束，就按 ' + plan.block.end + ' 记'; }
     else label = '加班中';
   } else {
     btn.textContent = '开始工作';
     btn.classList.remove('is-working');
-    if (ctx.curCounts) {
+    if (ctx.leaveNow) {
+      label = '请假中 · 到 ' + hhmm(ctx.leaveNow.e);
+      big.textContent = clockText(ctx.leaveNow.e - now);
+      hint = '';
+    } else if (ctx.curCounts) {
       label = ctx.cur.name + ' 已经开始';
-      big.textContent = clockText(now - ctx.cur.s);
+      big.textContent = clockText(now - ctx.curStart);
       big.classList.add('is-late');
       hint = '迟到中 · 每 10 分钟扣 ' + rules.missPer10;
     } else if (ctx.next) {
@@ -1961,9 +2360,9 @@ function renderClock() {
   if (sc.overtimeFish) chips.push(h('span', { class: 'wk-dot good', title: '加班 ' + durText(sc.overtimeMs) }, h('i'), '加班', h('b', { class: 'num', text: '+' + sc.overtimeFish })));
   const sig = chips.map((c) => c.className + c.textContent).join('|');
   if (sig !== chipsSig) { chipsSig = sig; $('wkChips').replaceChildren(...chips); }
-  const offBtn = $('offToday');
-  if (!offBtn.dataset.armed) offBtn.textContent = ctx.off ? '取消今天请假' : '今天请假';
-  offBtn.hidden = !ctx.scheduled;
+  $('wkStop').hidden = !w;
+  renderAway();
+  if (!w) $('wkStopForm').hidden = true;
 }
 
 // Timeline: plan on the left lane, what actually happened on the right lane, a line for now.
@@ -2015,6 +2414,10 @@ function renderTimeline() {
       height >= 38 ? h('span', { class: 'pt num', text: b.start + '–' + b.end }) : null);
     if (rows[b.id] && height >= 62) { const chip = blockChip(rows[b.id], true); if (chip) el.append(chip); }
     kids.push(el);
+  }
+  for (const l of (off ? [] : leavesOf(key))) {
+    const height = Math.max(14, (l.e - l.s) / 60000 * PX_PER_MIN - 4);
+    kids.push(h('div', { class: 'tl-plan tl-leave', title: '请假 ' + hhmm(l.s) + '–' + hhmm(l.e), style: 'top:' + (y(l.s) + 2) + 'px;height:' + height + 'px' }, h('span', { class: 'pn', text: '请假' }), height >= 38 ? h('span', { class: 'pt num', text: hhmm(l.s) + '–' + hhmm(l.e) }) : null));
   }
   if (!blocks.length) kids.push(h('p', { class: 'tl-empty', text: off ? '请假' : '不排班' }));
   for (const x of sess) {
@@ -2343,18 +2746,20 @@ function durMin(ms, up) {
   const mm = m % 60;
   return hh ? hh + ' 小时' + (mm ? ' ' + mm + ' 分' : '') : mm + ' 分';
 }
+function onTimeText(r) { return r.clockIn < (r.es || r.b.s) - 30 * 60000 ? '准时（连着干）' : '准时 ' + hhmm(r.clockIn); }
 function attRow(r) {
   const b = r.b;
   let status;
-  if (r.ignored) status = isOff(dayKeyOf(b.s)) ? '请假' : '不计';
+  if (r.ignored) status = isOff(dayKeyOf(b.s)) || r.leaveAll ? '请假' : '不计';
   else if (r.state === 'upcoming') status = '还没开始';
-  else if (r.state === 'ongoing') status = r.onTime ? '准时 ' + hhmm(r.clockIn) + ' · 进行中' : r.clockIn ? '迟到 ' + durMin(r.lateMs, true) + ' · 进行中' : '还没打卡 · 已过 ' + durMin(r.lateMs, true);
+  else if (r.state === 'ongoing') status = r.onTime ? onTimeText(r) + ' · 进行中' : r.clockIn ? '迟到 ' + durMin(r.lateMs, true) + ' · 进行中' : '还没打卡 · 已过 ' + durMin(r.lateMs, true);
   else if (r.absent) status = '缺勤';
   else {
-    const bits = [r.onTime ? '准时 ' + hhmm(r.clockIn) : '迟到 ' + durMin(r.lateMs, true), r.full ? '做满' : '早退'];
+    const bits = [r.onTime ? onTimeText(r) : '迟到 ' + durMin(r.lateMs, true), r.full ? '做满' : r.autoPending ? '自动结束，点「改」确认后算做满' : '早退'];
     if (r.missMs > 0) bits.push('少 ' + durMin(r.missMs, true));
     status = bits.join(' · ');
   }
+  if (!r.ignored && r.leaveMs > 0) status += ' · 请假 ' + durMin(r.leaveMs);
   const scored = r.state === 'done' && !r.ignored;
   return h('li', { class: 'row' },
     h('span', { class: 'dd-l' }, String(b.name).replace(/工作$/, '') || b.name, h('span', { class: 'tm', text: shortHM(b.start) + '–' + shortHM(b.end) })),
@@ -2364,20 +2769,21 @@ function attRow(r) {
     h('span'));
 }
 function renderDayDetail(T) {
+  if (!$('leavePanel').contains(document.activeElement)) renderLeavePanel();
+  const keepS = $('es-s') ? $('es-s').value : null;
+  const keepE = $('es-e') ? $('es-e').value : null;
+  const keepFocus = document.activeElement && document.activeElement.id;
   const key = selectedDay();
   const isToday = key === lastDay;
   const now = Date.now();
   const sc = T.attByDay[key] || scoreDay(key, now);
   $('dayTitle').textContent = (isToday ? '今天' : fmtMD(key)) + ' · 周' + WD_MON[isoWeekday(key) - 1];
   $('backToday').hidden = isToday;
-  const offBtn = $('offDay');
-  if (!offBtn.dataset.armed) offBtn.textContent = sc.off ? '取消请假' : '这天请假';
-  offBtn.hidden = !sc.scheduled;
 
   const total = T.netByDay[key] || 0;
   $('dayTotal').textContent = signed(total);
   $('dayTotal').className = 'dd-total num ' + (total < 0 ? 'neg' : 'pos');
-  $('dayTotal').title = [sc.pos || sc.neg ? '考勤 ' + signed(sc.net) : '', T.earnedByDay[key] ? '任务 +' + T.earnedByDay[key] : '', T.lifeByDay[key] ? '生活 +' + T.lifeByDay[key] + '（不算开工）' : '', T.spentByDay[key] ? '花 ' + T.spentByDay[key] : ''].filter(Boolean).join(' · ');
+  $('dayTotal').title = [sc.pos || sc.neg ? '考勤 ' + signed(sc.net) : '', T.earnedByDay[key] ? '任务 +' + T.earnedByDay[key] : '', T.lifeByDay[key] ? '生活 +' + T.lifeByDay[key] + '（不算开工）' : '', T.spentByDay[key] ? '花 ' + T.spentByDay[key] : '', T.leaveFeeByDay[key] ? '请假超额 −' + T.leaveFeeByDay[key] : ''].filter(Boolean).join(' · ');
 
   // One list: each work block with the clock-ins that belong to it, then 加班, then tasks and rewards.
   const sess = sessionsOf(key, now);
@@ -2389,8 +2795,25 @@ function renderDayDetail(T) {
     owner.set(x.id, best);
   }
   const sessText = (x) => hhmm(x.s) + '–' + (x.open ? '现在' : hhmm(x.e));
-  const delBtn = (x) => (isToday && !x.open ? h('button', { class: 'linkbtn danger dd-act', type: 'button', 'data-delsess': x.id, 'data-key': key, 'aria-label': '删除 ' + sessText(x) + ' 这段工作记录', text: '删除' }) : h('span'));
-  const subRows = (list) => list.map((x) => h('li', { class: 'row sub' }, h('span'), h('span', { class: 'dd-t' + (x.open ? ' live' : ''), text: sessText(x) }), h('span'), h('span'), delBtn(x)));
+  const rawSess = (data.days[key] && data.days[key].sessions) || {};
+  const tag = (x) => (rawSess[x.id] && rawSess[x.id].by === 'auto' ? h('span', { class: 'sess-tag warn', title: '忘了点结束，自动按这个时间记的。确认之前不给「做满」、不算加班；点「改」填真正的下班时间后正常算', text: '自动结束' }) : rawSess[x.id] && rawSess[x.id].by === 'idle' ? h('span', { class: 'sess-tag', title: '电脑 30 分钟没动，记到最后一次动电脑的时候', text: '离开' }) : rawSess[x.id] && rawSess[x.id].edited ? h('span', { class: 'sess-tag', text: '改过' }) : null);
+  const timeCell = (x) => h('span', { class: 'dd-t' + (x.open ? ' live' : '') }, sessText(x), tag(x));
+  const acts = (x) => (isToday && !x.open ? h('span', { class: 'dd-act dd-acts' },
+    h('button', { class: 'linkbtn', type: 'button', 'data-editsess': x.id, 'aria-label': '修改 ' + sessText(x) + ' 的时间', text: '改' }),
+    h('button', { class: 'linkbtn danger', type: 'button', 'data-delsess': x.id, 'data-key': key, 'aria-label': '删除 ' + sessText(x) + ' 这段工作记录', text: '删除' })) : h('span'));
+  const editRow = (x) => {
+    const raw = rawSess[x.id];
+    return h('li', { class: 'row sess-edit' },
+      h('span', { class: 'dd-l t', text: '改时间' }),
+      h('span', { class: 'sess-edit-f' }, inp('es-s', hhmm(x.s), { type: 'time', class: 'input time-in', 'aria-label': '开始' }), '–', inp('es-e', hhmm(x.e), { type: 'time', class: 'input time-in', 'aria-label': '结束' })),
+      h('span', { class: 'muted small', text: '只能往里改，最早 ' + hhmm(raw.start) + '，最晚 ' + hhmm(raw.end) }),
+      h('span', { class: 'dd-acts' }, h('button', { class: 'linkbtn', type: 'button', 'data-savesess': x.id, 'data-key': key, text: '保存' }), h('button', { class: 'linkbtn', type: 'button', 'data-cancelsess': '1', text: '取消' })));
+  };
+  // Overtime pieces of a record: the parts outside every work block.
+  const workB = sc.blocks.map((r) => ({ s: r.b.s, e: r.b.e }));
+  const otParts = (x) => (x.by === 'auto' ? [] : sc.off || !sc.scheduled ? [[x.s, x.e]] : subtractAll(x.s, x.e, workB)).filter(([a, z]) => z - a >= 60000);
+  const sessRow = (label, x, status, amt) => (editSess === x.id && isToday && !x.open ? editRow(x) : h('li', { class: 'row' + (label ? '' : ' sub') }, h('span', { class: 'dd-l', text: label }), timeCell(x), h('span', { class: x.open ? 'live' : '', text: status }), h('span', { class: 'dd-amt num', text: amt || '' }), acts(x)));
+  const otSub = (x) => otParts(x).map(([a, z]) => h('li', { class: 'row sub ot' }, h('span'), h('span', { class: 'dd-t', text: '└ ' + hhmm(a) + '–' + (x.open && z >= now - 1000 ? '现在' : hhmm(z)) }), h('span', { text: (sc.blocks.some((r) => r.b.s === z) && sc.blocks.some((r) => r.b.e === a) ? '两段之间连着干' : sc.blocks.some((r) => r.b.s === z) ? '提前开工' : '超出时段') + '，算加班 ' + durMin(z - a) }), h('span'), h('span')));
   const rows = [];
   if (!sc.scheduled) rows.push(h('li', { class: 'empty', text: '不排班，工作都算加班' }));
   else if (sc.off) rows.push(h('li', { class: 'empty', text: '请假，不算考勤' }));
@@ -2398,28 +2821,42 @@ function renderDayDetail(T) {
     const mine = sess.filter((x) => owner.get(x.id) === r.b.id);
     const row = attRow(r);
     const first = mine[0];
-    row.children[1].replaceWith(h('span', { class: 'dd-t' + (first && first.open ? ' live' : ''), text: first ? sessText(first) : '—' }));
-    row.children[4].replaceWith(first && mine.length === 1 ? delBtn(first) : h('span'));
-    rows.push(row);
-    if (mine.length > 1) rows.push(...subRows(mine.slice(1)));
-    if (mine.length > 1) row.children[4].replaceWith(delBtn(first));
+    if (first && editSess === first.id && isToday && !first.open) { rows.push(row); rows.push(editRow(first)); }
+    else {
+      const through = !first && sess.some((x) => x.s < r.b.e && x.e > r.b.s);
+      row.children[1].replaceWith(first ? timeCell(first) : h('span', { class: 'dd-t', text: through ? '连着上一段' : '—' }));
+      row.children[4].replaceWith(first ? acts(first) : h('span'));
+      rows.push(row);
+    }
+    if (first) rows.push(...otSub(first));
+    for (const x of mine.slice(1)) { rows.push(sessRow('', x, '', '')); rows.push(...otSub(x)); }
   });
+  // Records that sit outside every work block: one 加班 row each, with its own time and length.
   const loose = sess.filter((x) => !owner.get(x.id));
-  if (sc.overtimeMs >= 60000 || loose.length) {
+  for (const x of loose) rows.push(sessRow('加班', x, x.open ? '进行中 · ' + durMin(x.e - x.s) : x.by === 'auto' ? '自动结束，确认后才算加班' : durMin(x.e - x.s), ''));
+  if (sc.overtimeMs >= 60000) {
     const capped = sc.overtimeMs > sc.rules.overtimeCapMin * 60000;
-    const first = loose[0];
-    rows.push(h('li', { class: 'row' },
-      h('span', { class: 'dd-l', text: '加班' }),
-      h('span', { class: 'dd-t' + (first && first.open ? ' live' : ''), text: first ? sessText(first) : '' }),
-      h('span', { text: durMin(sc.overtimeMs) + (capped ? ' · 按 ' + durMin(sc.rules.overtimeCapMin * 60000) + ' 算' : '') }),
+    rows.push(h('li', { class: 'row ot-sum' },
+      h('span', { class: 'dd-l', text: '加班合计' }),
+      h('span', { class: 'dd-t', text: durMin(sc.overtimeMs) }),
+      h('span', { class: 'muted', text: (Number(sc.rules.overtimeHalfAfterMin) ? '前 ' + durMin(sc.rules.overtimeHalfAfterMin * 60000) + '每 10 分 +' + sc.rules.overtimePer10 + '，之后减半' : '每满 10 分钟 +' + sc.rules.overtimePer10) + (capped ? '，最多按 ' + durMin(sc.rules.overtimeCapMin * 60000) + '算' : '') }),
       h('span', { class: 'dd-amt num pos', text: sc.overtimeFish ? '+' + sc.overtimeFish : '' }),
-      first ? delBtn(first) : h('span')));
-    rows.push(...subRows(loose.slice(1)));
+      h('span')));
   }
+  // Leave taken this day, and the fee if the week's free hours ran out.
+  const lvs = sc.off ? [] : leavesOf(key);
+  for (const l of lvs) {
+    const onWork = sc.blocks.reduce((sum, r) => sum + unionWithin([l], r.b.s, r.b.e), 0);
+    rows.push(h('li', { class: 'row leave-row' }, h('span', { class: 'dd-l', text: '请假' }), h('span', { class: 'dd-t', text: hhmm(l.s) + '–' + hhmm(l.e) }), h('span', { class: 'muted', text: onWork ? '占工作时间 ' + durMin(onWork) : '不在工作时段' }), h('span'), h('span')));
+  }
+  const fee = T.leaveFeeByDay[key] || 0;
+  if (fee) rows.push(h('li', { class: 'row leave-row' }, h('span', { class: 'dd-l', text: '请假超额' }), h('span'), h('span', { class: 'muted', text: '本周超出 ' + durMin(leaveFreeMs()) + ' 的部分，每小时 ' + leavePerHour() + ' 条' }), h('span', { class: 'dd-amt num neg', text: '−' + fee }), h('span')));
   if (!rows.length) rows.push(emptyLi('这天没有考勤'));
   $('attList').replaceChildren(...rows);
+  if (keepS !== null && $('es-s')) { $('es-s').value = keepS; $('es-e').value = keepE; if (keepFocus === 'es-s' || keepFocus === 'es-e') $(keepFocus).focus(); }
 
   const evs = eventsOf(data.days[key]);
+  renderTrash(key);
   $('recordList').hidden = !evs.length;
   $('recordList').replaceChildren(...evs.map((e) => {
     const fish = Number(e.fish) || 0;
@@ -2429,6 +2866,19 @@ function renderDayDetail(T) {
       h('span', { style: 'grid-column: span 2', text: (e.name || '') + (e.life ? '（生活）' : '') }),
       h('span', { class: 'dd-amt num ' + (spend ? 'neg' : 'pos'), text: (spend ? '−' : '+') + fish }),
       isToday ? h('button', { class: 'linkbtn dd-act', type: 'button', 'data-undo': e.id, 'data-key': key, 'aria-label': '撤销：' + (e.name || '这条记录'), text: '撤销' }) : h('span'));
+  }));
+}
+
+// Today's deleted work records and undone task records, each with 恢复.
+function renderTrash(key) {
+  const d = data.days[key];
+  const list = key === lastDay && d && d.trash ? Object.keys(d.trash).map((id) => Object.assign({ id }, d.trash[id])).sort((a, b) => b.at - a.at) : [];
+  $('trashList').hidden = !list.length;
+  if (!list.length) { $('trashList').replaceChildren(); return; }
+  $('trashList').replaceChildren(h('li', { class: 'trash-head', text: '刚删掉的（今天之内可以恢复）' }), ...list.map((t) => {
+    const x = t.data || {};
+    const what = t.type === 'session' ? '工作 ' + hhmm(x.start) + '–' + hhmm(x.end) : hhmm(x.at) + ' ' + (x.name || '') + ' ' + (x.kind === 'spend' ? '−' : '+') + (Number(x.fish) || 0);
+    return h('li', { class: 'row trash-row' }, h('span', { class: 'dd-t', text: '删于 ' + hhmm(t.at) }), h('span', { style: 'grid-column: span 3', text: what }), h('button', { class: 'linkbtn', type: 'button', 'data-restore': t.id, 'data-key': key, text: '恢复' }));
   }));
 }
 
@@ -2458,10 +2908,6 @@ function tick() {
     pushReminders(true);
     pushStatus(true);
     return;
-  }
-  if (data.work) {
-    const plan = sessionPlan(data.work);
-    if (now > plan.limit) finishSession(data.work, plan.autoEnd, 'auto', '忘了打下班卡，按 ' + hhmm(plan.autoEnd) + ' 记了。');
   }
   const t0 = activeTimer();
   if (t0 && now >= overrunOf(t0, now).capAt) { const m = endBreak(true); render(); showToast(m); }
@@ -2501,8 +2947,13 @@ document.addEventListener('click', (ev) => {
     if (r && redeem(r)) confetti(rc.left + rc.width / 2, rc.top + rc.height / 2);
     return;
   }
-  if (el.dataset.undo) { undoEvents(el.dataset.key, [el.dataset.undo]); return; }
-  if (el.dataset.delsess) { if (armed(el, '确定删除？')) deleteSession(el.dataset.key, el.dataset.delsess); }
+  if (el.dataset.undo) { undoEvents(el.dataset.key, [el.dataset.undo], true); return; }
+  if (el.dataset.restore) { restoreTrash(el.dataset.key, el.dataset.restore); return; }
+  if (el.dataset.away) { if (el.dataset.away === 'count') awayCount(); else awayDrop(el.dataset.away === 'leave'); return; }
+  if (el.dataset.delsess) { if (armed(el, '确定删除？')) deleteSession(el.dataset.key, el.dataset.delsess); return; }
+  if (el.dataset.editsess) { editSess = el.dataset.editsess; render(); const f = $('es-e'); if (f) f.focus(); return; }
+  if (el.dataset.savesess) { saveSessEdit(el.dataset.key, el.dataset.savesess); return; }
+  if (el.dataset.cancelsess) { editSess = ''; render(); return; }
 });
 document.addEventListener('change', (ev) => {
   const sel = ev.target;
@@ -2744,24 +3195,34 @@ function renderRulesPop() {
     ['做满', '一直工作到这一段结束，+' + a.full + '。'],
     ['迟到 / 早退', '每少 10 分钟扣 ' + a.missPer10 + '（不满 10 分钟也按 10 分钟算），每段最多扣 ' + a.missCap + '。'],
     ['缺勤', '整段一次都没打卡，扣 ' + a.absent + '。'],
-    ['加班', '工作时段以外的工作，每满 10 分钟 +' + a.overtimePer10 + '，每天最多算 ' + cap + '。'],
+    ['加班', '工作时段以外的工作（包括连着干过午饭、晚饭），每满 10 分钟 +' + a.overtimePer10 + (Number(a.overtimeHalfAfterMin) ? '，超过 ' + durMin(a.overtimeHalfAfterMin * 60000) + '以后减半' : '') + '，每天最多算 ' + cap + '。'],
+    ['请假', '每周有 ' + durMin(leaveFreeMs()) + '免费的假，不扣小鱼干；超出的部分每小时扣 ' + leavePerHour() + ' 条。请假的那段不算迟到、早退、缺勤。可以提前请这周剩下的日子，也可以补请今天已经过去、但没在工作的时间。请假中途回来点「开始工作」，假就到那时结束，没用完的退回额度。'],
     ['休息超时', '兑换的计时休息到点后没回来，每超 1 分钟扣 ' + overrunPerMin() + ' 条，最多扣 ' + overrunPerMin() * overrunCapMin() + ' 条；超过 ' + overrunCapMin() + ' 分钟自动结束。'],
   ];
   $('rulesPop').replaceChildren(
     h('ol', null, ...items.map(([k, v]) => h('li', null, h('b', { text: k + '：' }), v))),
-    h('p', { class: 'muted small', text: '不排班的日子和请假的日子不计考勤。分值可以在「编辑作息」里改。' }),
+    h('p', { class: 'muted small', text: '不排班的日子和请假的时间不计考勤。开始工作后会一直计时，跨时段连着干也不用重新打卡。电脑 30 分钟没动，就当你离开了，工作记到你最后一次动电脑的时候；2 小时内回来会接着计时，并问你离开那段算不算工作。以前「自动结束」的旧记录不给「做满」、不算加班，点「改」确认后正常算。分值可以在「编辑作息」里改。' }),
     h('p', { class: 'muted small', text: '每天攒够 ' + goal() + ' 条算开工，「连续开工天数」+1。只断一天不会中断；连着两天没达标，连续天数才从 0 重新算。小鱼干不会因此减少。生活奖励不算开工。凌晨 4 点前算前一天。' }));
 }
 makePopover('rulesBtn', 'rulesPop', renderRulesPop);
 $('wkBtn').addEventListener('click', toggleWork);
-$('offToday').addEventListener('click', (ev) => {
-  const off = isOff(lastDay);
-  if (armed(ev.currentTarget, off ? '确定取消请假？' : '确定今天请假？今天不计考勤')) toggleOff(lastDay);
+$('leaveBtn').addEventListener('click', () => {
+  const open = $('leavePanel').hidden;
+  $('leavePanel').hidden = !open;
+  $('leaveBtn').setAttribute('aria-expanded', String(open));
+  if (open) { leaveDraft = null; renderLeavePanel(); }
 });
-$('offDay').addEventListener('click', (ev) => {
-  const key = selectedDay();
-  if (armed(ev.currentTarget, isOff(key) ? '确定取消请假？' : '确定这天算请假？')) toggleOff(key);
+$('leavePanel').addEventListener('click', onLeaveClick);
+$('leavePanel').addEventListener('change', onLeaveChange);
+$('wkStopBtn').addEventListener('click', () => {
+  if (!data.work) return;
+  $('wkStopForm').hidden = false;
+  $('wkStopAt').value = hhmm(Date.now());
+  $('wkStopAt').focus();
 });
+$('wkStopCancel').addEventListener('click', () => { $('wkStopForm').hidden = true; });
+$('wkStopOk').addEventListener('click', stopAtChosen);
+$('wkStopAt').addEventListener('keydown', (ev) => { if (ev.key === 'Enter') stopAtChosen(); });
 $('restBtn').addEventListener('click', () => { const msg = endBreak(); render(); showToast(msg); });
 $('tlEditBtn').addEventListener('click', openSchedEditor);
 $('tlPrev').addEventListener('click', () => selectDay(addDays(selectedDay(), -1)));

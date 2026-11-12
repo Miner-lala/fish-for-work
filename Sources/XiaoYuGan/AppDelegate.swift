@@ -135,7 +135,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, WKSc
     private func everySecond() {
         refreshStatusTitle()
         seconds += 1
-        if seconds % 15 == 0 { runPage("tick") }
+        if seconds % 15 == 0 {
+            reportIdle()
+            runPage("tick")
+        }
+    }
+
+    /// Seconds since the last keyboard or mouse input anywhere on the Mac; the page uses it to notice you have left.
+    private func reportIdle() {
+        guard let any = CGEventType(rawValue: ~0) else { return }
+        let idle = CGEventSource.secondsSinceLastEventType(.hidSystemState, eventType: any)
+        webView?.evaluateJavaScript("window.xygIdle && window.xygIdle(\(Int(idle)))", completionHandler: nil)
     }
 
     // MARK: Menu bar
