@@ -235,8 +235,13 @@ h3 { font-size: 14px; font-weight: 650; color: var(--muted); }
 .sess-tag { display: inline-block; margin-left: 6px; padding: 0 6px; border-radius: 999px; font-size: 11px; line-height: 17px; background: var(--surface-2); color: var(--muted); font-family: inherit; }
 .sess-tag.warn { background: #FCE9C8; color: #8A5300; }
 .dd-acts { display: inline-flex; gap: 10px; justify-self: end; white-space: nowrap; }
-.list.dd .row.sess-edit { align-items: center; background: var(--surface-2); border-radius: 8px; padding: 8px 6px; }
-.sess-edit-f { display: inline-flex; align-items: center; gap: 4px; }
+.list.dd .sess-edit { list-style: none; display: flex; flex-direction: column; gap: 6px; margin: 2px 0 6px; padding: 10px 12px; background: var(--surface-2); border: 1px solid var(--line); border-radius: 10px; }
+.sess-edit-line { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
+.sess-edit-k { font-size: 13px; font-weight: 600; }
+.sess-edit-f { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; }
+.sess-edit-f .input.time-in { width: 9.5em; }
+.sess-edit .dd-acts { margin-left: auto; align-items: center; }
+.sess-edit p { margin: 0; }
 .list.dd .row.ot .dd-t, .list.dd .row.ot span { color: var(--muted); font-size: 13px; }
 .list.dd .row.ot-sum { border-top: 1px dashed var(--line); }
 .dd-trash { border-top: 1px dashed var(--line); padding-top: 4px; }
@@ -1072,7 +1077,7 @@ function scoreDay(key, now) {
       r.autoPending = !r.full && sess.some((x) => x.by === 'auto' && x.s < ee && x.e >= ee);
       r.missMs = eb.pieces.reduce((sum, [a, z]) => sum + z - a, 0) - r.coveredMs;
       r.absent = r.coveredMs <= 0;
-      if (r.absent) {
+      if (r.absent && !r.leaveMs) {
         r.fish = -rules.absent;
         res.neg += rules.absent;
       } else {
@@ -1094,7 +1099,8 @@ function scoreDay(key, now) {
     res.overtimeMs += x.e - x.s - inside;
   }
   // Every full 10 minutes earns overtimePer10; past overtimeHalfAfterMin each 10 minutes earns half; nothing past the cap.
-  const units = Math.floor(Math.min(res.overtimeMs, rules.overtimeCapMin * 60000) / 600000);
+  res.overtimeCapMs = p.scheduled ? rules.overtimeCapMin * 60000 : Infinity; // days off (weekends) have no cap
+  const units = Math.floor(Math.min(res.overtimeMs, res.overtimeCapMs) / 600000);
   const halfAfter = Number(rules.overtimeHalfAfterMin) || 0;
   const fullUnits = halfAfter > 0 ? Math.floor(halfAfter / 10) : units;
   res.overtimeFish = Math.round(Math.min(units, fullUnits) * rules.overtimePer10 + Math.max(0, units - fullUnits) * rules.overtimePer10 / 2);
@@ -1145,7 +1151,7 @@ function computeTotals(now) {
 }
 
 // Streak: one missed day is forgiven; two missed days in a row reset it. Today never counts as a miss.
-function computeStreak(byDay, todayKey, firstKey, goalValue) {
+function computeStreak(byDay, todayKey, firstKey, goalValue, skippable) {
   const todayMet = (byDay[todayKey] || 0) >= goalValue;
   let count = todayMet ? 1 : 0;
   let miss = 0;
@@ -1153,6 +1159,7 @@ function computeStreak(byDay, todayKey, firstKey, goalValue) {
   let d = addDays(todayKey, -1);
   while (firstKey && d >= firstKey) {
     const met = (byDay[d] || 0) >= goalValue;
+    if (!met && skippable && skippable(d)) { d = addDays(d, -1); continue; }
     if (yesterdayMet === null) yesterdayMet = met;
     if (met) { count += 1; miss = 0; }
     else { miss += 1; if (miss >= 2) break; }
@@ -2284,7 +2291,7 @@ function renderToday(T) {
   $('todayBar').style.width = Math.max(0, Math.min(100, (net / g) * 100)) + '%';
   $('todayMeter').classList.toggle('met', net >= g);
   $('balance').textContent = T.balance < 0 ? '−' + Math.abs(T.balance) : T.balance;
-  const s = computeStreak(T.netByDay, lastDay, T.firstKey, g);
+  const s = computeStreak(T.netByDay, lastDay, T.firstKey, g, (k) => { const sc = T.attByDay[k]; return !sc || !sc.scheduled || sc.off || (sc.blocks.length > 0 && sc.blocks.every((r) => r.leaveAll)); });
   let line = '';
   if (s.todayMet) line = '已开工 · 连续 ' + s.count + ' 天';
   else if (s.atRisk) line = '昨天没达标，今天补上就不断';
@@ -2753,7 +2760,8 @@ function attRow(r) {
   if (r.ignored) status = isOff(dayKeyOf(b.s)) || r.leaveAll ? '请假' : '不计';
   else if (r.state === 'upcoming') status = '还没开始';
   else if (r.state === 'ongoing') status = r.onTime ? onTimeText(r) + ' · 进行中' : r.clockIn ? '迟到 ' + durMin(r.lateMs, true) + ' · 进行中' : '还没打卡 · 已过 ' + durMin(r.lateMs, true);
-  else if (r.absent) status = '缺勤';
+  else if (r.absent && !r.leaveMs) status = '缺勤';
+  else if (r.absent) status = '没来 · 少 ' + durMin(r.missMs, true);
   else {
     const bits = [r.onTime ? onTimeText(r) : '迟到 ' + durMin(r.lateMs, true), r.full ? '做满' : r.autoPending ? '自动结束，点「改」确认后算做满' : '早退'];
     if (r.missMs > 0) bits.push('少 ' + durMin(r.missMs, true));
@@ -2803,11 +2811,12 @@ function renderDayDetail(T) {
     h('button', { class: 'linkbtn danger', type: 'button', 'data-delsess': x.id, 'data-key': key, 'aria-label': '删除 ' + sessText(x) + ' 这段工作记录', text: '删除' })) : h('span'));
   const editRow = (x) => {
     const raw = rawSess[x.id];
-    return h('li', { class: 'row sess-edit' },
-      h('span', { class: 'dd-l t', text: '改时间' }),
-      h('span', { class: 'sess-edit-f' }, inp('es-s', hhmm(x.s), { type: 'time', class: 'input time-in', 'aria-label': '开始' }), '–', inp('es-e', hhmm(x.e), { type: 'time', class: 'input time-in', 'aria-label': '结束' })),
-      h('span', { class: 'muted small', text: '只能往里改，最早 ' + hhmm(raw.start) + '，最晚 ' + hhmm(raw.end) }),
-      h('span', { class: 'dd-acts' }, h('button', { class: 'linkbtn', type: 'button', 'data-savesess': x.id, 'data-key': key, text: '保存' }), h('button', { class: 'linkbtn', type: 'button', 'data-cancelsess': '1', text: '取消' })));
+    return h('li', { class: 'sess-edit' },
+      h('div', { class: 'sess-edit-line' },
+        h('span', { class: 'sess-edit-k', text: '改时间' }),
+        h('span', { class: 'sess-edit-f' }, inp('es-s', hhmm(x.s), { type: 'time', class: 'input time-in', 'aria-label': '开始' }), h('span', { text: '到' }), inp('es-e', hhmm(x.e), { type: 'time', class: 'input time-in', 'aria-label': '结束' })),
+        h('span', { class: 'dd-acts' }, h('button', { class: 'btn primary mini', type: 'button', 'data-savesess': x.id, 'data-key': key, text: '保存' }), h('button', { class: 'linkbtn', type: 'button', 'data-cancelsess': '1', text: '取消' }))),
+      h('p', { class: 'muted small', text: '只能往里改：开始不早于 ' + hhmm(raw.start) + '，结束不晚于 ' + hhmm(raw.end) + '。' }));
   };
   // Overtime pieces of a record: the parts outside every work block.
   const workB = sc.blocks.map((r) => ({ s: r.b.s, e: r.b.e }));
@@ -2835,11 +2844,11 @@ function renderDayDetail(T) {
   const loose = sess.filter((x) => !owner.get(x.id));
   for (const x of loose) rows.push(sessRow('加班', x, x.open ? '进行中 · ' + durMin(x.e - x.s) : x.by === 'auto' ? '自动结束，确认后才算加班' : durMin(x.e - x.s), ''));
   if (sc.overtimeMs >= 60000) {
-    const capped = sc.overtimeMs > sc.rules.overtimeCapMin * 60000;
+    const capped = sc.overtimeMs > sc.overtimeCapMs;
     rows.push(h('li', { class: 'row ot-sum' },
       h('span', { class: 'dd-l', text: '加班合计' }),
       h('span', { class: 'dd-t', text: durMin(sc.overtimeMs) }),
-      h('span', { class: 'muted', text: (Number(sc.rules.overtimeHalfAfterMin) ? '前 ' + durMin(sc.rules.overtimeHalfAfterMin * 60000) + '每 10 分 +' + sc.rules.overtimePer10 + '，之后减半' : '每满 10 分钟 +' + sc.rules.overtimePer10) + (capped ? '，最多按 ' + durMin(sc.rules.overtimeCapMin * 60000) + '算' : '') }),
+      h('span', { class: 'muted', text: (Number(sc.rules.overtimeHalfAfterMin) ? '前 ' + durMin(sc.rules.overtimeHalfAfterMin * 60000) + '每 10 分 +' + sc.rules.overtimePer10 + '，之后减半' : '每满 10 分钟 +' + sc.rules.overtimePer10) + (capped ? '，最多按 ' + durMin(sc.overtimeCapMs) + '算' : !sc.scheduled ? '，不排班的日子不封顶' : '') }),
       h('span', { class: 'dd-amt num pos', text: sc.overtimeFish ? '+' + sc.overtimeFish : '' }),
       h('span')));
   }
@@ -3195,14 +3204,14 @@ function renderRulesPop() {
     ['做满', '一直工作到这一段结束，+' + a.full + '。'],
     ['迟到 / 早退', '每少 10 分钟扣 ' + a.missPer10 + '（不满 10 分钟也按 10 分钟算），每段最多扣 ' + a.missCap + '。'],
     ['缺勤', '整段一次都没打卡，扣 ' + a.absent + '。'],
-    ['加班', '工作时段以外的工作（包括连着干过午饭、晚饭），每满 10 分钟 +' + a.overtimePer10 + (Number(a.overtimeHalfAfterMin) ? '，超过 ' + durMin(a.overtimeHalfAfterMin * 60000) + '以后减半' : '') + '，每天最多算 ' + cap + '。'],
+    ['加班', '工作时段以外的工作（包括连着干过午饭、晚饭），每满 10 分钟 +' + a.overtimePer10 + (Number(a.overtimeHalfAfterMin) ? '，超过 ' + durMin(a.overtimeHalfAfterMin * 60000) + '以后减半' : '') + '，每天最多算 ' + cap + '；不排班的日子（比如周末）不封顶。'],
     ['请假', '每周有 ' + durMin(leaveFreeMs()) + '免费的假，不扣小鱼干；超出的部分每小时扣 ' + leavePerHour() + ' 条。请假的那段不算迟到、早退、缺勤。可以提前请这周剩下的日子，也可以补请今天已经过去、但没在工作的时间。请假中途回来点「开始工作」，假就到那时结束，没用完的退回额度。'],
     ['休息超时', '兑换的计时休息到点后没回来，每超 1 分钟扣 ' + overrunPerMin() + ' 条，最多扣 ' + overrunPerMin() * overrunCapMin() + ' 条；超过 ' + overrunCapMin() + ' 分钟自动结束。'],
   ];
   $('rulesPop').replaceChildren(
     h('ol', null, ...items.map(([k, v]) => h('li', null, h('b', { text: k + '：' }), v))),
     h('p', { class: 'muted small', text: '不排班的日子和请假的时间不计考勤。开始工作后会一直计时，跨时段连着干也不用重新打卡。电脑 30 分钟没动，就当你离开了，工作记到你最后一次动电脑的时候；2 小时内回来会接着计时，并问你离开那段算不算工作。以前「自动结束」的旧记录不给「做满」、不算加班，点「改」确认后正常算。分值可以在「编辑作息」里改。' }),
-    h('p', { class: 'muted small', text: '每天攒够 ' + goal() + ' 条算开工，「连续开工天数」+1。只断一天不会中断；连着两天没达标，连续天数才从 0 重新算。小鱼干不会因此减少。生活奖励不算开工。凌晨 4 点前算前一天。' }));
+    h('p', { class: 'muted small', text: '每天攒够 ' + goal() + ' 条算开工，「连续开工天数」+1。只断一天不会中断；连着两个工作日没达标，连续天数才从 0 重新算。不排班的日子（比如周末）和整天请假的日子：达标照样 +1，没达标不算断。小鱼干不会因此减少。生活奖励不算开工。凌晨 4 点前算前一天。' }));
 }
 makePopover('rulesBtn', 'rulesPop', renderRulesPop);
 $('wkBtn').addEventListener('click', toggleWork);
